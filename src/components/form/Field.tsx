@@ -5,7 +5,7 @@
  * Campo de formulario reutilizable (input/textarea) con label, icono, error,
  * hint y contador. Fuente única del estilo de inputs: `inputClasses`.
  */
-import React from 'react';
+import React, { useId } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 type Accent = 'blue' | 'rose';
@@ -65,11 +65,13 @@ export default function Field({
 }: FieldProps) {
   const handle = (v: string) => onChange(numeric ? v.replace(/\D/g, '') : v);
   const cls = `${inputClasses(accent, !!error, !!Icon)}${multiline ? ' resize-none' : ''}`;
+  const autoId = useId();
+  const fieldId = id ?? autoId;
 
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={id} className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between gap-2">
+        <label htmlFor={fieldId} className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between gap-2">
           <span>
             {label}
             {required && <span className="text-rose-500"> *</span>}
@@ -85,9 +87,9 @@ export default function Field({
           </div>
         )}
         {multiline ? (
-          <textarea id={id} placeholder={placeholder} rows={rows} maxLength={maxLength} value={value} onChange={(e) => handle(e.target.value)} className={cls} />
+          <textarea id={fieldId} placeholder={placeholder} rows={rows} maxLength={maxLength} value={value} onChange={(e) => handle(e.target.value)} className={cls} />
         ) : (
-          <input id={id} type={type} inputMode={inputMode} placeholder={placeholder} maxLength={maxLength} value={value} onChange={(e) => handle(e.target.value)} className={cls} />
+          <input id={fieldId} type={type} inputMode={inputMode} placeholder={placeholder} maxLength={maxLength} value={value} onChange={(e) => handle(e.target.value)} className={cls} />
         )}
       </div>
       {error ? (

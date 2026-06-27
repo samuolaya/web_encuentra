@@ -204,8 +204,9 @@ export default function SearchMissingForm() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-slate-500 normal-case block">Nombre</label>
+                  <label htmlFor="search-nombre" className="text-[11px] font-semibold text-slate-500 normal-case block">Nombre</label>
                   <input
+                    id="search-nombre"
                     type="text"
                     placeholder="Nombre de quien buscas"
                     maxLength={80}
@@ -215,7 +216,7 @@ export default function SearchMissingForm() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-slate-500 normal-case block">Cédula</label>
+                  <label htmlFor="search-doc" className="text-[11px] font-semibold text-slate-500 normal-case block">Cédula</label>
                   <DocumentInput
                     tipo={qDocTipo}
                     numero={qDocNumero}
@@ -223,6 +224,7 @@ export default function SearchMissingForm() {
                     onNumero={(v) => { setQDocNumero(v); setIdError(null); }}
                     accent="rose"
                     error={!!idError}
+                    numeroId="search-doc"
                   />
                 </div>
               </div>

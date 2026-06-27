@@ -274,7 +274,7 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                <label htmlFor="person-doc-input" className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                   Documento de identidad <span className="text-slate-400 font-medium normal-case">(opcional)</span>
                 </label>
                 <DocumentInput tipo={docTipo} numero={docNumero} onTipo={setDocTipo} onNumero={setDocNumero} accent="blue" numeroId="person-doc-input" />
@@ -301,14 +301,14 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
             />
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+              <label htmlFor="ubicacion-input" className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                 Dónde se encontró <span className="text-slate-400 font-medium normal-case">(opcional)</span>
               </label>
               <LocationCombobox value={ubicacion} onChange={setUbicacion} options={locations} onForget={forget} accent="blue" id="ubicacion-input" />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+              <label htmlFor="contact-phone-input" className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                 Teléfono del responsable <span className="text-rose-500">*</span>
               </label>
               <div className="flex gap-2">

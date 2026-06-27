@@ -20,7 +20,8 @@ import {
   Users, 
   ExternalLink,
   ShieldAlert,
-  Activity
+  Activity,
+  Instagram
 } from 'lucide-react';
 
 import { FoundPerson } from './types';
@@ -285,6 +286,21 @@ export default function App() {
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
             Plataforma dedicada a facilitar el reencuentro familiar en situaciones de emergencia. Cumplimos con los lineamientos internacionales de protección de identidad para menores y heridos desorientados.
           </p>
+
+          <div className="pt-4 flex flex-col items-center gap-2.5">
+            <p className="text-xs sm:text-sm text-slate-500 max-w-md">
+              Para dudas, aportes o problemas, por favor comunícate con nosotros a este Instagram:
+            </p>
+            <a
+              href="https://instagram.com/vzlaencuentra"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg hover:scale-[1.03] transition-all bg-gradient-to-tr from-amber-500 via-rose-600 to-purple-600"
+            >
+              <Instagram size={18} />
+              @vzlaencuentra
+            </a>
+          </div>
         </div>
       </footer>
 
