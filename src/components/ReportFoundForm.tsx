@@ -225,7 +225,7 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-blue-600 hover:border-blue-700 hover:bg-blue-50/30 rounded-xl p-6 text-center cursor-pointer transition-all max-w-sm mx-auto"
+                className="border-2 border-dashed border-blue-600 hover:border-blue-700 hover:bg-blue-50/30 rounded-xl p-6 text-center cursor-pointer transition-all"
                 id="file-upload-only"
               >
                 <input
