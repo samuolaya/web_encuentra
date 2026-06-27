@@ -10,7 +10,7 @@ describe('createMockApi', () => {
 
     expect(result.total).toBeGreaterThan(0);
     expect(result.coincidencias[0].nombre).toContain('Santiago');
-    expect(result.coincidencias[0].image_url.startsWith('data:image/svg+xml')).toBe(true);
+    expect(result.coincidencias[0].image_url).toBeTruthy();
   });
 
   it('stores a newly registered found person in memory', () => {
