@@ -46,12 +46,10 @@ function createAvatarDataUrl(label: string, tone: string) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+const tones = ['#f97316', '#0ea5e9', '#10b981', '#8b5cf6', '#ef4444'];
+
 function toMockFoundPeople(): FoundPerson[] {
-  const tones = ['#f97316', '#0ea5e9', '#10b981', '#8b5cf6', '#ef4444'];
-  return INITIAL_FOUND_PERSONS.map((person, index) => ({
-    ...person,
-    imageUrl: createAvatarDataUrl(person.name, tones[index % tones.length]),
-  }));
+  return INITIAL_FOUND_PERSONS.map((person) => ({ ...person }));
 }
 
 function toCandidate(person: FoundPerson, index: number): Candidato {
@@ -60,7 +58,7 @@ function toCandidate(person: FoundPerson, index: number): Candidato {
   return {
     person_id: person.id,
     estado: person.status === 'hospitalizado' ? 'encontrada' : 'encontrada',
-    es_menor: /niño|menor/i.test(person.name),
+    es_menor: person.esMenor ?? false,
     nombre: person.name,
     apellido: '',
     edad: null,
@@ -68,7 +66,7 @@ function toCandidate(person: FoundPerson, index: number): Candidato {
     ubicacion: person.locationAddress,
     telefono: person.contactPhone,
     descripcion: person.physicalDescription,
-    image_url: person.imageUrl,
+    image_url: person.imageUrl || createAvatarDataUrl(person.name, tones[index % tones.length]),
     distancia: distance,
     coincidencia: score,
     confianza: score >= 90 ? 'alta' : score >= 80 ? 'media' : 'baja',
