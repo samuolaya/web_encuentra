@@ -19,15 +19,15 @@ describe('usePhotoUpload', () => {
     vi.restoreAllMocks();
   });
 
-  it('adds only image files up to the configured max', () => {
+  it('adds only image files up to the configured max', async () => {
     const createObjectURL = vi
       .spyOn(URL, 'createObjectURL')
       .mockImplementation((file) => `blob:${(file as File).name}`);
 
     const { result } = renderHook(() => useHarness(2));
 
-    act(() => {
-      result.current.addFiles([
+    await act(async () => {
+      await result.current.addFiles([
         makeFile('one.png', 'image/png'),
         makeFile('two.jpg', 'image/jpeg'),
         makeFile('notes.txt', 'text/plain'),
@@ -42,14 +42,14 @@ describe('usePhotoUpload', () => {
     ]);
   });
 
-  it('revokes the preview URL when a photo is removed', () => {
+  it('revokes the preview URL when a photo is removed', async () => {
     vi.spyOn(URL, 'createObjectURL').mockImplementation((file) => `blob:${(file as File).name}`);
     const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
 
     const { result } = renderHook(() => useHarness(2));
 
-    act(() => {
-      result.current.addFiles([makeFile('one.png', 'image/png')]);
+    await act(async () => {
+      await result.current.addFiles([makeFile('one.png', 'image/png')]);
     });
 
     act(() => {
@@ -60,14 +60,14 @@ describe('usePhotoUpload', () => {
     expect(result.current.photos).toEqual([]);
   });
 
-  it('revokes every preview URL on reset and unmount', () => {
+  it('revokes every preview URL on reset and unmount', async () => {
     vi.spyOn(URL, 'createObjectURL').mockImplementation((file) => `blob:${(file as File).name}`);
     const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
 
     const { result, unmount } = renderHook(() => useHarness(3));
 
-    act(() => {
-      result.current.addFiles([
+    await act(async () => {
+      await result.current.addFiles([
         makeFile('one.png', 'image/png'),
         makeFile('two.jpg', 'image/jpeg'),
       ]);
@@ -81,8 +81,8 @@ describe('usePhotoUpload', () => {
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:two.jpg');
     expect(result.current.photos).toEqual([]);
 
-    act(() => {
-      result.current.addFiles([makeFile('three.png', 'image/png')]);
+    await act(async () => {
+      await result.current.addFiles([makeFile('three.png', 'image/png')]);
     });
 
     unmount();
