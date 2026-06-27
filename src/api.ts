@@ -119,6 +119,50 @@ const appendIf = (fd: FormData, key: string, val?: string) => {
   if (val && val.trim()) fd.append(key, val.trim());
 };
 
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let msg = `Error ${res.status}`;
+    try {
+      const data = await res.json();
+      if (data?.detail) {
+        msg = Array.isArray(data.detail) ? data.detail.map((d: { msg: string }) => d.msg).join(' · ') : String(data.detail);
+      }
+    } catch {
+      /* respuesta sin JSON */
+    }
+    throw new Error(msg);
+  }
+  return res.json() as Promise<T>;
+}
+
+// URL oficial del proyecto, usada en los reportes de falla.
+const PROJECT_URL = 'https://symtechven.com/';
+
+export interface ReporteCreado {
+  id: string;
+  tipo: string;
+  estado: string;
+  created_at: string;
+}
+
+// ---- POST /reportes/falla (botón "Reportar Error") ----
+export async function reportarFalla(descripcion: string): Promise<ReporteCreado> {
+  return postJson<ReporteCreado>('/reportes/falla', { descripcion: descripcion.trim(), url: PROJECT_URL });
+}
+
+// ---- POST /reportes/publicacion (banderita "reportar como falso") ----
+export async function reportarPublicacion(personId: string): Promise<ReporteCreado> {
+  return postJson<ReporteCreado>('/reportes/publicacion', {
+    person_id: personId,
+    descripcion: 'contenido ofensivo o los resultados no concuerdan',
+  });
+}
+
 // ---- POST /buscados (flujo familiar) ----
 export interface BuscarInput {
   files: File[];

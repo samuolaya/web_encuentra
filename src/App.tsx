@@ -29,10 +29,37 @@ import SearchMissingForm from './components/SearchMissingForm';
 import ReportFoundForm from './components/ReportFoundForm';
 import ApiIntegrationGuide from './components/ApiIntegrationGuide';
 import OnboardingModal from './components/OnboardingModal';
+import { reportarFalla } from './api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'buscar' | 'reportar' | 'api'>('reportar');
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorText, setErrorText] = useState('');
+  const [errorSending, setErrorSending] = useState(false);
+  const [errorSent, setErrorSent] = useState(false);
+  const [errorSendError, setErrorSendError] = useState<string | null>(null);
+
+  const openErrorModal = () => {
+    setErrorText('');
+    setErrorSent(false);
+    setErrorSendError(null);
+    setIsErrorModalOpen(true);
+  };
+
+  const submitFalla = async () => {
+    if (errorText.trim().length < 3 || errorSending) return;
+    setErrorSending(true);
+    setErrorSendError(null);
+    try {
+      await reportarFalla(errorText);
+      setErrorSent(true);
+      setErrorText('');
+    } catch (err) {
+      setErrorSendError(err instanceof Error ? err.message : 'No se pudo enviar el reporte. Intenta de nuevo.');
+    } finally {
+      setErrorSending(false);
+    }
+  };
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('ven_onboarded'));
 
   const closeOnboarding = () => {
@@ -113,23 +140,6 @@ export default function App() {
     savePersons(updated);
   };
 
-  const handleTriggerReunion = (reunitedPerson: FoundPerson) => {
-    const updated = foundPersons.map(p => {
-      if (p.id === reunitedPerson.id) {
-        return { ...p, status: 'reunificado' as const };
-      }
-      return p;
-    });
-    savePersons(updated);
-
-    // Increment reunited count
-    const newStats = {
-      ...stats,
-      reunitedCount: stats.reunitedCount + 1
-    };
-    setStats(newStats);
-    localStorage.setItem('ven_disaster_stats', JSON.stringify(newStats));
-  };
 
   // Emergency helplines for Venezuelan civil support
   const emergencyHotlines = [
@@ -156,11 +166,16 @@ export default function App() {
           <div className="flex justify-between items-center h-16">
             {/* Logo area */}
             <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
-              <div className="p-1.5 sm:p-2 bg-rose-600 rounded-xl shadow-sm border border-rose-700 shrink-0 flex items-center justify-center">
-                <Heart size={18} className="text-white fill-white sm:w-5 sm:h-5 animate-pulse" />
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-sm overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex flex-col">
+                  <div className="flex-1 bg-amber-400"></div>
+                  <div className="flex-1 bg-blue-600"></div>
+                  <div className="flex-1 bg-rose-600"></div>
+                </div>
+                <Heart size={18} className="relative text-white fill-white sm:w-5 sm:h-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] animate-pulse" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm sm:text-base font-black text-slate-800 tracking-tight leading-none uppercase truncate">Reencuentro</h1>
+                <h1 className="text-sm sm:text-base font-black text-slate-800 tracking-tight leading-none truncate">VzlaEncuentra</h1>
                 <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">S.O.S. - Búsqueda de personas</p>
               </div>
             </div>
@@ -169,7 +184,7 @@ export default function App() {
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
 
               <button
-                onClick={() => setIsErrorModalOpen(true)}
+                onClick={openErrorModal}
                 className="flex items-center gap-1.5 sm:gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm shrink-0 whitespace-nowrap"
               >
                 <AlertTriangle size={14} />
@@ -216,9 +231,7 @@ export default function App() {
 
 
         {activeTab === 'buscar' && (
-          <SearchMissingForm
-            onTriggerReunion={handleTriggerReunion}
-          />
+          <SearchMissingForm />
         )}
 
         {activeTab === 'reportar' && (
@@ -291,30 +304,56 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold text-slate-800">Reportar un Error</h3>
             </div>
-            <p className="text-sm text-slate-600 mb-4">
-              Describe brevemente el problema que encontraste para que podamos solucionarlo lo antes posible.
-            </p>
-            <textarea 
-              className="w-full border border-slate-200 rounded-xl p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
-              placeholder="Ej: La imagen no carga, el botón de enviar no funciona..."
-            ></textarea>
-            <div className="mt-5 flex justify-end gap-3">
-              <button 
-                onClick={() => setIsErrorModalOpen(false)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={() => {
-                  alert('¡Gracias por tu reporte! Lo revisaremos pronto.');
-                  setIsErrorModalOpen(false);
-                }}
-                className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-sm transition-all"
-              >
-                Enviar Reporte
-              </button>
-            </div>
+
+            {errorSent ? (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-100">
+                  <CheckCircle size={26} />
+                </div>
+                <p className="text-sm font-semibold text-slate-800">¡Gracias por tu reporte!</p>
+                <p className="text-xs text-slate-500 mt-1">Lo revisaremos pronto.</p>
+                <button
+                  onClick={() => setIsErrorModalOpen(false)}
+                  className="mt-5 px-4 py-2 text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all"
+                >
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-slate-600 mb-4">
+                  Describe brevemente el problema que encontraste para que podamos solucionarlo lo antes posible.
+                </p>
+                <textarea
+                  maxLength={350}
+                  value={errorText}
+                  onChange={(e) => setErrorText(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  placeholder="Ej: La imagen no carga, el botón de enviar no funciona..."
+                ></textarea>
+                <p className="text-[10px] text-slate-400 text-right mt-1 tabular-nums">{errorText.length}/350</p>
+                {errorSendError && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertTriangle size={13} className="shrink-0" />{errorSendError}
+                  </p>
+                )}
+                <div className="mt-4 flex justify-end gap-3">
+                  <button
+                    onClick={() => setIsErrorModalOpen(false)}
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={submitFalla}
+                    disabled={errorText.trim().length < 3 || errorSending}
+                    className="px-4 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg shadow-sm transition-all"
+                  >
+                    {errorSending ? 'Enviando…' : 'Enviar Reporte'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -28,10 +28,15 @@ export default function OnboardingModal({ onClose }: Props) {
         </button>
 
         <div className="text-center mb-5">
-          <div className="w-12 h-12 bg-rose-600 rounded-xl shadow-sm flex items-center justify-center mx-auto mb-3">
-            <Heart size={22} className="text-white fill-white" />
+          <div className="relative w-12 h-12 rounded-xl shadow-sm overflow-hidden flex items-center justify-center mx-auto mb-3">
+            <div className="absolute inset-0 flex flex-col">
+              <div className="flex-1 bg-amber-400"></div>
+              <div className="flex-1 bg-blue-600"></div>
+              <div className="flex-1 bg-rose-600"></div>
+            </div>
+            <Heart size={22} className="relative text-white fill-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
           </div>
-          <h2 className="text-lg font-black text-slate-800 uppercase tracking-tight">Bienvenido a Reencuentro</h2>
+          <h2 className="text-lg font-black text-slate-800 tracking-tight">Bienvenido a VzlaEncuentra</h2>
           <p className="text-sm text-slate-500 mt-1">Así puedes ayudar a reunir familias.</p>
         </div>
 

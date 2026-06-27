@@ -4,22 +4,31 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { Search, Camera, AlertCircle, FileText, Heart, MapPin, Phone, ArrowRight, CheckCircle2, HelpCircle, X, Flag } from 'lucide-react';
+import { Search, Camera, AlertCircle, FileText, Heart, MapPin, Phone, ArrowRight, HelpCircle, X, Flag } from 'lucide-react';
 import { FoundPerson, MatchResult } from '../types';
-import { buscarPersona } from '../api';
+import { buscarPersona, reportarPublicacion } from '../api';
 import PhotoUploader, { Photo } from './form/PhotoUploader';
 import HelpModal, { HelpStep } from './form/HelpModal';
 import DocumentInput from './form/DocumentInput';
 import { useFormDraft } from './form/useFormDraft';
 import { inputClasses } from './form/Field';
 
-interface SearchMissingFormProps {
-  onTriggerReunion: (person: FoundPerson) => void;
-}
-
 // ponytail: capacity knob — set to 1 for single-photo mode, raise to allow more
 const MAX_IMAGES = 1;
 const PAGE_SIZE = 6;
+
+// Arma el enlace de WhatsApp a partir del teléfono (normaliza a internacional +58).
+const waLink = (phone: string) => {
+  let d = (phone || '').replace(/\D/g, '');
+  if (d.startsWith('58')) {
+    /* ya internacional */
+  } else if (d.startsWith('0')) {
+    d = `58${d.slice(1)}`;
+  } else {
+    d = `58${d}`;
+  }
+  return `https://wa.me/${d}`;
+};
 
 const HELP_STEPS: HelpStep[] = [
   { n: 1, t: 'Subir Fotografía', d: 'Sube una foto del rostro de la persona que buscas. Se requiere visibilidad frontal clara.' },
@@ -28,7 +37,7 @@ const HELP_STEPS: HelpStep[] = [
   { n: 4, t: 'Contacto Seguro', d: 'Ante una coincidencia cierta, solicita el reencuentro y preséntate con tu identificación oficial.' },
 ];
 
-export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFormProps) {
+export default function SearchMissingForm() {
   const [showHelp, setShowHelp] = useState(false);
   // Persistido entre cambios de pestaña (draft 'search.*')
   const [photos, setPhotos] = useFormDraft<Photo[]>('search.photos', []);
@@ -42,8 +51,6 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
   const [selectedCandidate, setSelectedCandidate] = useState<FoundPerson | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [idError, setIdError] = useState<string | null>(null);
-  const [isSuccessReunion, setIsSuccessReunion] = useState(false);
-  const [matchRequestedPerson, setMatchRequestedPerson] = useState<FoundPerson | null>(null);
   const [reportedIds, setReportedIds] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
@@ -122,19 +129,11 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
       });
   };
 
-  const handleRequestReunion = (person: FoundPerson) => {
-    setMatchRequestedPerson(person);
-    setIsSuccessReunion(true);
-    onTriggerReunion(person);
-  };
-
   const handleResetSearch = () => {
     setPhotos([]);
     setIdError(null);
     setSearchResults(null);
     setSelectedCandidate(null);
-    setIsSuccessReunion(false);
-    setMatchRequestedPerson(null);
     setReportedIds([]);
     setPage(0);
   };
@@ -175,30 +174,7 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
         id="help-procedure-modal"
       />
 
-      {isSuccessReunion ? (
-        <div className="text-center py-8 px-4 max-w-lg mx-auto" id="success-reunion-screen">
-          <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100 animate-bounce">
-            <CheckCircle2 size={32} />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900">Solicitud de Reencuentro Registrada</h3>
-          <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-            Se ha enviado una notificación de coincidencia a los encargados en <strong>{matchRequestedPerson?.hospitalName}</strong>.
-          </p>
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 my-6 text-left text-xs text-slate-600 space-y-2">
-            <p><strong>Persona Encontrada:</strong> {matchRequestedPerson?.name}</p>
-            <p><strong>Ubicación:</strong> {matchRequestedPerson?.locationAddress}</p>
-            <p><strong>Teléfono de Enlace:</strong> {matchRequestedPerson?.contactPhone}</p>
-            <p className="text-[11px] text-amber-600 font-semibold">⚠️ Por seguridad, presenta tu documento de identidad al momento de establecer contacto físico en el centro.</p>
-          </div>
-          <button
-            onClick={handleResetSearch}
-            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-medium text-sm rounded-xl transition-all shadow-sm"
-            id="btn-reunion-back"
-          >
-            Realizar Nueva Búsqueda
-          </button>
-        </div>
-      ) : !searchResults ? (
+      {!searchResults ? (
         <form onSubmit={startAnalysis} className="space-y-5">
           {/* Step 1: Image Selection */}
           <div className="space-y-3">
@@ -223,7 +199,8 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Datos de la persona que buscas <span className="text-rose-500">*</span>
                 </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Completa <strong>solo uno</strong>: su nombre o su cédula (no hacen falta ambos).</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Completa su nombre o su cedula
+                  <strong> (no hacen falta ambos).</strong></p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -331,7 +308,7 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
                     <img
                       src={person.imageUrl}
                       alt={person.name}
-                      className={`w-full h-56 object-cover ${isReported ? 'grayscale' : ''}`}
+                      className={`w-full h-56 object-contain bg-slate-100 ${isReported ? 'grayscale' : ''}`}
                       referrerPolicy="no-referrer"
                     />
                     <div className="p-4 space-y-2">
@@ -361,6 +338,8 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
                                 e.stopPropagation();
                                 setReportedIds((prev) => [...prev, person.id]);
                                 setConfirmingId(null);
+                                // Envía el reporte al back (no bloquea la UI)
+                                reportarPublicacion(person.id).catch(() => {});
                               }}
                               className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white transition-all"
                             >
@@ -435,7 +414,7 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
               <img
                 src={selectedCandidate.imageUrl}
                 alt={selectedCandidate.name}
-                className="w-full h-64 sm:h-72 object-cover"
+                className="w-full h-64 sm:h-72 object-contain"
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-10">
@@ -478,17 +457,16 @@ export default function SearchMissingForm({ onTriggerReunion }: SearchMissingFor
               </div>
 
               <div className="pt-4 border-t border-slate-200/60">
-                <button
-                  onClick={() => {
-                    handleRequestReunion(selectedCandidate);
-                    setSelectedCandidate(null);
-                  }}
+                <a
+                  href={waLink(selectedCandidate.contactPhone)}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                   id="btn-request-reunion"
                 >
                   <Heart size={16} />
                   Contactar vía WhatsApp
-                </button>
+                </a>
               </div>
             </div>
           </div>

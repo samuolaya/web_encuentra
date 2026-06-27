@@ -67,7 +67,7 @@ export default function PhotoUploader({ photos, max, accent, error, disabled, on
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
             {photos.map((p, idx) => (
               <div key={idx} className="relative aspect-square">
-                <img src={p.url} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover rounded-lg border border-slate-200 shadow-sm" />
+                <img src={p.url} alt={`Foto ${idx + 1}`} className="w-full h-full object-contain bg-slate-100 rounded-lg border border-slate-200 shadow-sm" />
                 <button
                   type="button"
                   onClick={() => onRemove(idx)}

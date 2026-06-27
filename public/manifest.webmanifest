@@ -1,6 +1,6 @@
 {
-  "name": "Reencuentro — S.O.S. Búsqueda de personas",
-  "short_name": "Reencuentro",
+  "name": "VzlaEncuentra — S.O.S. Búsqueda de personas",
+  "short_name": "VzlaEncuentra",
   "description": "Reconocimiento facial para reunir personas desaparecidas con sus familias tras el terremoto en Venezuela.",
   "lang": "es-VE",
   "start_url": "/",
