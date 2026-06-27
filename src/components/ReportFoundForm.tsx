@@ -19,8 +19,8 @@ interface ReportFoundFormProps {
 // ponytail: capacity knob — backend accepts varias fotos del mismo registro
 const MAX_IMAGES = 5;
 
-// Teléfono VE: 0424-8135166 / 04248135166 (4+7) o +58 424 8135166 (+58 +10), con o sin guion/espacio.
-const isValidPhone = (v: string) => /^(0\d{10}|\+58\d{10})$/.test(v.replace(/[\s-]/g, ''));
+// Teléfono VE: prefijo elegido + 7 dígitos. Ej: 0424 + 8135166 -> 04248135166.
+const PHONE_PREFIXES = ['0424', '0412', '0416', '0426', '0422'];
 
 const HELP_STEPS: HelpStep[] = [
   { n: 1, t: 'Capturar Foto', d: 'Carga una o varias fotos. El rostro debe estar bien iluminado y de frente.' },
@@ -42,7 +42,8 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
   const [docNumero, setDocNumero] = useState('');
   const [refugio, setRefugio] = useState('');
   const [ubicacion, setUbicacion] = useState('');
-  const [telefonoResponsable, setTelefonoResponsable] = useState('');
+  const [telPrefijo, setTelPrefijo] = useState('0424');
+  const [telNumero, setTelNumero] = useState('');
   const [docResponsable, setDocResponsable] = useState('');
   const [descripcion, setDescripcion] = useState('');
 
@@ -72,14 +73,15 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
     const errs: Record<string, string> = {};
     if (photos.length === 0) errs.photos = 'Adjunta al menos una fotografía clara del rostro.';
     if (!refugio.trim()) errs.refugio = 'Indica el refugio, hospital o centro receptor.';
-    if (!telefonoResponsable.trim()) errs.telefono = 'Proporciona el teléfono del responsable.';
-    else if (!isValidPhone(telefonoResponsable)) errs.telefono = 'Formato inválido. Ej: 0424-8135166 o +58 424 8135166.';
+    if (telNumero.length !== 7) errs.telefono = 'El teléfono debe tener 7 dígitos.';
     if (isChild && !docResponsable.trim()) errs.docResponsable = 'La identificación del responsable es obligatoria para un menor.';
 
     if (Object.keys(errs).length) {
       setErrors(errs);
       return;
     }
+
+    const telefonoResponsable = `${telPrefijo}${telNumero}`;
 
     setErrors({});
     inFlight.current = true;
@@ -131,7 +133,8 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
     setDocNumero('');
     setRefugio('');
     setUbicacion('');
-    setTelefonoResponsable('');
+    setTelPrefijo('0424');
+    setTelNumero('');
     setDocResponsable('');
     setDescripcion('');
     setResult(null);
@@ -332,22 +335,32 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
                 Teléfono del responsable <span className="text-rose-500">*</span>
               </label>
-              <div className="relative">
-                {!telefonoResponsable && (
+              <div className="flex gap-2">
+                <select
+                  value={telPrefijo}
+                  onChange={(e) => setTelPrefijo(e.target.value)}
+                  className="px-3 py-2.5 bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl text-slate-800 text-sm outline-none transition-all font-bold shadow-sm shrink-0"
+                  aria-label="Prefijo telefónico"
+                >
+                  {PHONE_PREFIXES.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+                <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <Phone size={16} className="text-slate-400" />
                   </div>
-                )}
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="0424-8135166 o +58 424 8135166"
-                  maxLength={17}
-                  value={telefonoResponsable}
-                  onChange={(e) => { setTelefonoResponsable(e.target.value.replace(/[^\d+\s-]/g, '')); clearError('telefono'); }}
-                  className={`${fieldClass('telefono')} ${telefonoResponsable ? 'pl-3.5' : 'pl-10'}`}
-                  id="contact-phone-input"
-                />
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="8135166"
+                    maxLength={7}
+                    value={telNumero}
+                    onChange={(e) => { setTelNumero(e.target.value.replace(/\D/g, '')); clearError('telefono'); }}
+                    className={`${fieldClass('telefono')} pl-10`}
+                    id="contact-phone-input"
+                  />
+                </div>
               </div>
               <FieldError field="telefono" />
             </div>
