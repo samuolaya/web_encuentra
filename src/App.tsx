@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Activity } from 'react';
 import { 
   Heart, 
   UserRoundSearch , 
@@ -20,7 +20,6 @@ import {
   Users, 
   ExternalLink,
   ShieldAlert,
-  Activity,
   Instagram,
   Mail
 } from 'lucide-react';
@@ -32,6 +31,14 @@ import ReportFoundForm from './components/ReportFoundForm';
 import ApiIntegrationGuide from './components/ApiIntegrationGuide';
 import OnboardingModal from './components/OnboardingModal';
 import { reportarFalla } from './api';
+
+// Emergency helplines for Venezuelan civil support
+const emergencyHotlines = [
+  { agency: "Protección Civil Nacional", phone: "0800-PCCIVIL (7224845)", hours: "24 Horas", desc: "Coordinación nacional de desastres y rescate." },
+  { agency: "Cuerpo de Bomberos de Caracas", phone: "(0212) 545-4545", hours: "24 Horas", desc: "Emergencias viales, rescate y atención primaria." },
+  { agency: "Cruz Roja Venezolana", phone: "(0212) 571-4111", hours: "8:00 AM - 6:00 PM", desc: "Búsqueda de familiares, apoyo médico y humanitario." },
+  { agency: "Servicio de Emergencias VEN 911", phone: "911", hours: "24 Horas", desc: "Línea única de atención para emergencias y patrullaje." }
+];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'buscar' | 'reportar' | 'api'>('reportar');
@@ -143,13 +150,7 @@ export default function App() {
   };
 
 
-  // Emergency helplines for Venezuelan civil support
-  const emergencyHotlines = [
-    { agency: "Protección Civil Nacional", phone: "0800-PCCIVIL (7224845)", hours: "24 Horas", desc: "Coordinación nacional de desastres y rescate." },
-    { agency: "Cuerpo de Bomberos de Caracas", phone: "(0212) 545-4545", hours: "24 Horas", desc: "Emergencias viales, rescate y atención primaria." },
-    { agency: "Cruz Roja Venezolana", phone: "(0212) 571-4111", hours: "8:00 AM - 6:00 PM", desc: "Búsqueda de familiares, apoyo médico y humanitario." },
-    { agency: "Servicio de Emergencias VEN 911", phone: "911", hours: "24 Horas", desc: "Línea única de atención para emergencias y patrullaje." }
-  ];
+
 
   return (
     <div className="min-h-screen flex flex-col font-sans overflow-x-hidden" id="app-root-container">
@@ -229,15 +230,15 @@ export default function App() {
 
 
 
-        {activeTab === 'buscar' && (
+        <Activity name="search-form" mode={activeTab === 'buscar' ? 'visible' : 'hidden'}>
           <SearchMissingForm />
-        )}
+        </Activity>
 
-        {activeTab === 'reportar' && (
+        <Activity name="report-form" mode={activeTab === 'reportar' ? 'visible' : 'hidden'}>
           <ReportFoundForm 
             onAddPerson={handleAddPerson} 
           />
-        )}
+        </Activity>
 
         {activeTab === 'api' && (
           <ApiIntegrationGuide />
@@ -294,7 +295,7 @@ export default function App() {
                 href="https://instagram.com/Venezuelaencuentra"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg hover:scale-[1.03] transition-all bg-gradient-to-tr from-amber-500 via-rose-600 to-purple-600"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:shadow-lg hover:scale-[1.03] transition-all bg-linear-to-tr from-amber-500 via-rose-600 to-purple-600"
               >
                 <Instagram size={18} />
                 @Venezuelaencuentra
