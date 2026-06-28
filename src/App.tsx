@@ -233,15 +233,16 @@ export default function App() {
 
 
 
-        <Activity name="search-form" mode={activeTab === 'buscar' ? 'visible' : 'hidden'}> 
+        <div className={activeTab !== 'buscar' ? 'hidden' : ''}>
           <SearchMissingForm />
-        </Activity>
+        </div>
 
-        <Activity name="report-form" mode={activeTab === 'reportar' ? 'visible' : 'hidden'}>
+        <div className={activeTab !== 'reportar' ? 'hidden' : ''}>
           <ReportFoundForm 
             onAddPerson={handleAddPerson} 
           />
-        </Activity>
+        </div>
+
         {activeTab === 'api' && (
           <ApiIntegrationGuide />
         )}
