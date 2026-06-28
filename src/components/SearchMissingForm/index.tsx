@@ -11,7 +11,7 @@ import DocumentInput from '../form/DocumentInput';
 import { inputClasses } from '../form/Field';
 import { fieldError } from '../form/fieldError';
 import { Button } from '@/components/ui/button';
-import { searchByImageSchema, searchByImageDefaults,  } from './missing.schema';
+import { searchByImageSchema, searchByImageDefaults, getCrossFieldErrors, MSG_REQUIRE_NAME_OR_DOC } from './missing.schema';
 
 import type{ FoundPerson, MatchResult } from '@/types';
 
@@ -53,7 +53,10 @@ export default function SearchMissingForm() {
 
   const form = useForm({
     defaultValues: searchByImageDefaults,
-    validators: { onSubmit: searchByImageSchema },
+    validators: {
+      onSubmit: searchByImageSchema,
+      onChange: ({ value }) => ({ fields: getCrossFieldErrors({ qNombre: value.qNombre, qDocNumero: value.qDocNumero }) }),
+    },
     onSubmit: async ({ value }) => {
       setSearchError(null);
 
@@ -205,7 +208,17 @@ export default function SearchMissingForm() {
                   <strong> (no hacen falta ambos).</strong></p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <form.Field name="qNombre">
+                <form.Field
+                  name="qNombre"
+                  validators={{
+                    onChangeListenTo: ['qDocNumero'],
+                    onChange: ({ value, fieldApi }) => {
+                      if (!value?.trim() && !fieldApi.form.getFieldValue('qDocNumero')?.trim()) {
+                        return MSG_REQUIRE_NAME_OR_DOC;
+                      }
+                    },
+                  }}
+                >
                   {(field) => (
                     <div className="space-y-1.5">
                       <label htmlFor="search-nombre" className="text-[11px] font-semibold text-slate-500 normal-case block">Nombre</label>
@@ -215,13 +228,23 @@ export default function SearchMissingForm() {
                         placeholder="Nombre completo de quien buscas"
                         maxLength={80}
                         value={field.state.value}
-                        onChange={(e) => { field.handleChange(e.target.value); field.setMeta((prev) => ({ ...prev, errors: [] })); form.setFieldMeta('qDocNumero', (prev) => ({ ...prev, errors: [] })); }}
+                        onChange={(e) => { field.handleChange(e.target.value); }}
                         className={inputClasses('rose', !!field.state.meta.errors?.[0])}
                       />
                     </div>
                   )}
                 </form.Field>
-                <form.Field name="qDocNumero">
+                <form.Field
+                  name="qDocNumero"
+                  validators={{
+                    onChangeListenTo: ['qNombre'],
+                    onChange: ({ value, fieldApi }) => {
+                      if (!fieldApi.form.getFieldValue('qNombre')?.trim() && !value?.trim()) {
+                        return MSG_REQUIRE_NAME_OR_DOC;
+                      }
+                    },
+                  }}
+                >
                   {(field) => {
                     const qDocNumeroError = field.state.meta.errors?.[0];
                     return (
@@ -231,7 +254,7 @@ export default function SearchMissingForm() {
                           tipo={qDocTipo}
                           numero={field.state.value}
                           onTipo={(v) => form.setFieldValue('qDocTipo', v)}
-                          onNumero={(v) => { field.handleChange(v); field.setMeta((prev) => ({ ...prev, errors: [] })); form.setFieldMeta('qNombre', (prev) => ({ ...prev, errors: [] })); }}
+                          onNumero={(v) => { field.handleChange(v); }}
                           accent="rose"
                           error={!!qDocNumeroError}
                           numeroId="search-doc"
