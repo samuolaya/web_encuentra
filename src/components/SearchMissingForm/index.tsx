@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { UserRoundSearch, Camera, AlertCircle, FileText, Heart, MapPin, Phone, ArrowRight, HelpCircle, X, Flag } from 'lucide-react';
-import { useForm,  } from '@tanstack/react-form';
+import { revalidateLogic, useForm,  } from '@tanstack/react-form';
 import { useSelector } from '@tanstack/react-store';
 
 import { buscarPersona, reportarPublicacion } from '@/api';
@@ -11,7 +11,8 @@ import DocumentInput from '../form/DocumentInput';
 import { inputClasses } from '../form/Field';
 import { fieldError } from '../form/fieldError';
 import { Button } from '@/components/ui/button';
-import { searchByImageSchema, searchByImageDefaults, getCrossFieldErrors, MSG_REQUIRE_NAME_OR_DOC } from './missing.schema';
+import { searchByImageDefaults, searchByImageSchema } from './missing.schema';
+import { useAnalyzer } from './useAnalyzer';
 
 import type{ FoundPerson, MatchResult } from '@/types';
 
@@ -41,9 +42,7 @@ const toPhotos = (v: unknown) => v as Photo[];
 
 export default function SearchMissingForm() {
   const [showHelp, setShowHelp] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [analysisStep, setAnalysisStep] = useState('');
+  const { isAnalyzing, analysisProgress, analysisStep, runSearch } = useAnalyzer();
   const [searchResults, setSearchResults] = useState<MatchResult[] | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<FoundPerson | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -53,54 +52,22 @@ export default function SearchMissingForm() {
 
   const form = useForm({
     defaultValues: searchByImageDefaults,
+    validationLogic: revalidateLogic(),
     validators: {
-      onSubmit: searchByImageSchema,
-      onChange: ({ value }) => ({ fields: getCrossFieldErrors({ qNombre: value.qNombre, qDocNumero: value.qDocNumero }) }),
+      onDynamic: searchByImageSchema,
     },
     onSubmit: async ({ value }) => {
       setSearchError(null);
-
-      setIsAnalyzing(true);
-      setAnalysisProgress(0);
-      setAnalysisStep('Subiendo fotos...');
       setPage(0);
-
-      const TOTAL_MS = 10000;
-      const start = Date.now();
-      let done = false;
-
-      const tick = setInterval(() => {
-        if (done) return;
-        const pct = Math.min(95, ((Date.now() - start) / TOTAL_MS) * 100);
-        setAnalysisProgress(Math.round(pct));
-        setAnalysisStep(
-          pct < 20 ? 'Normalizando imagen...' :
-          pct < 45 ? 'Extrayendo rasgos faciales...' :
-          pct < 70 ? 'Consultando base de datos...' :
-          'Comparando coincidencias...'
-        );
-      }, 100);
-
       try {
-        const results = await buscarPersona({
+        const results = await runSearch(() => buscarPersona({
           files: toPhotos(value.photos).map((p) => p.file),
           nombre: value.qNombre,
           docTipo: value.qDocTipo,
           docNumero: value.qDocNumero,
-        });
-        done = true;
-        clearInterval(tick);
-        setAnalysisProgress(100);
-        setAnalysisStep('Búsqueda completada.');
-        setTimeout(() => {
-          setSearchResults(results);
-          setIsAnalyzing(false);
-        }, 400);
+        }));
+        setSearchResults(results);
       } catch (err) {
-        done = true;
-        clearInterval(tick);
-        setIsAnalyzing(false);
-        setAnalysisProgress(0);
         setSearchError(err instanceof Error ? err.message : 'No se pudo completar la búsqueda. Intenta de nuevo.');
       }
     },
@@ -132,7 +99,6 @@ export default function SearchMissingForm() {
 
   const photos = useSelector(form.store, (state) => state.values.photos);
 
-  
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-6" id="search-missing-view">
@@ -208,17 +174,7 @@ export default function SearchMissingForm() {
                   <strong> (no hacen falta ambos).</strong></p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <form.Field
-                  name="qNombre"
-                  validators={{
-                    onChangeListenTo: ['qDocNumero'],
-                    onChange: ({ value, fieldApi }) => {
-                      if (!value?.trim() && !fieldApi.form.getFieldValue('qDocNumero')?.trim()) {
-                        return MSG_REQUIRE_NAME_OR_DOC;
-                      }
-                    },
-                  }}
-                >
+                <form.Field name="qNombre">
                   {(field) => (
                     <div className="space-y-1.5">
                       <label htmlFor="search-nombre" className="text-[11px] font-semibold text-slate-500 normal-case block">Nombre</label>
@@ -231,20 +187,13 @@ export default function SearchMissingForm() {
                         onChange={(e) => { field.handleChange(e.target.value); }}
                         className={inputClasses('rose', !!field.state.meta.errors?.[0])}
                       />
+                      {field.state.meta.errors?.[0] && (
+                        <p className="text-xs text-red-600 flex items-center gap-1"><AlertCircle size={13} className="shrink-0" />{fieldError(field.state.meta.errors[0])}</p>
+                      )}
                     </div>
                   )}
                 </form.Field>
-                <form.Field
-                  name="qDocNumero"
-                  validators={{
-                    onChangeListenTo: ['qNombre'],
-                    onChange: ({ value, fieldApi }) => {
-                      if (!fieldApi.form.getFieldValue('qNombre')?.trim() && !value?.trim()) {
-                        return MSG_REQUIRE_NAME_OR_DOC;
-                      }
-                    },
-                  }}
-                >
+                <form.Field name="qDocNumero">
                   {(field) => {
                     const qDocNumeroError = field.state.meta.errors?.[0];
                     return (
@@ -259,16 +208,14 @@ export default function SearchMissingForm() {
                           error={!!qDocNumeroError}
                           numeroId="search-doc"
                         />
+                        {qDocNumeroError && (
+                          <p className="text-xs text-red-600 flex items-center gap-1"><AlertCircle size={13} className="shrink-0" />{fieldError(qDocNumeroError)}</p>
+                        )}
                       </div>
                     );
                   }}
                 </form.Field>
               </div>
-              <form.Field name="qDocNumero">
-                {(field) => field.state.meta.errors?.[0] && (
-                  <p className="text-xs text-red-600 flex items-center gap-1"><AlertCircle size={13} className="shrink-0" />{fieldError(field.state.meta.errors[0])}</p>
-                )}
-              </form.Field>
             </div>
           </div>
 
