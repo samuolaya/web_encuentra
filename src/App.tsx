@@ -195,7 +195,7 @@ export default function App() {
       </header>
 
       {/* Main Container Content */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <main className="grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
         {/* Main Action Buttons */}
         <div className="flex mb-5 max-w-4xl mx-auto rounded-xl border-2 border-slate-200 overflow-hidden shadow-sm" role="tablist">
           <button
@@ -362,7 +362,7 @@ export default function App() {
                   maxLength={350}
                   value={errorText}
                   onChange={(e) => setErrorText(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  className="w-full border border-slate-200 rounded-xl p-3 text-sm min-h-25 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
                   placeholder="Ej: La imagen no carga, el botón de enviar no funciona..."
                 ></textarea>
                 <p className="text-[10px] text-slate-400 text-right mt-1 tabular-nums">{errorText.length}/350</p>

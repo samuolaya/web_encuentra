@@ -13,7 +13,7 @@ interface Props {
 
 export default function OnboardingModal({ onClose }: Props) {
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-80 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative p-6 sm:p-7 max-h-[90vh] overflow-y-auto animate-[fadeIn_0.2s_ease-out]"
         onClick={(e) => e.stopPropagation()}

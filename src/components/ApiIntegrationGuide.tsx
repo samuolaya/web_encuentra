@@ -262,7 +262,7 @@ if __name__ == "__main__":
             </button>
           </div>
           <div className="relative">
-            <pre className="bg-slate-950 text-slate-300 font-mono text-[11px] md:text-xs p-4 rounded-xl overflow-x-auto max-h-[250px] border border-slate-800/80 scrollbar-thin">
+            <pre className="bg-slate-950 text-slate-300 font-mono text-[11px] md:text-xs p-4 rounded-xl overflow-x-auto max-h-62.5 border border-slate-800/80 scrollbar-thin">
               <code>{pythonAdapterCode}</code>
             </pre>
           </div>
@@ -284,7 +284,7 @@ if __name__ == "__main__":
             </button>
           </div>
           <div className="relative">
-            <pre className="bg-slate-950 text-slate-300 font-mono text-[11px] md:text-xs p-4 rounded-xl overflow-x-auto max-h-[300px] border border-slate-800/80 scrollbar-thin">
+            <pre className="bg-slate-950 text-slate-300 font-mono text-[11px] md:text-xs p-4 rounded-xl overflow-x-auto max-h-75 border border-slate-800/80 scrollbar-thin">
               <code>{expressCode}</code>
             </pre>
           </div>

@@ -32,7 +32,7 @@ export default function HelpModal({ open, onClose, title, steps, accent, id }: P
   const a = ACCENTS[accent];
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} id={id}>
+    <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} id={id}>
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative p-5 sm:p-6 max-h-[90vh] overflow-y-auto animate-[fadeIn_0.2s_ease-out]"
         onClick={(e) => e.stopPropagation()}
