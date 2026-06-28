@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { Search, Camera, AlertCircle, FileText, Heart, MapPin, Phone, ArrowRight, HelpCircle, X, Flag } from 'lucide-react';
+import { UserRoundSearch , Camera, AlertCircle, FileText, Heart, MapPin, Phone, ArrowRight, HelpCircle, X, Flag } from 'lucide-react';
 import { FoundPerson, MatchResult } from '../types';
 import { buscarPersona, reportarPublicacion } from '../api';
 import PhotoUploader, { Photo } from './form/PhotoUploader';
@@ -147,7 +147,7 @@ export default function SearchMissingForm() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 mb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl shrink-0">
-            <Search size={22} />
+            <UserRoundSearch  size={22} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-slate-800 leading-tight">Buscar Familiar</h2>
@@ -255,7 +255,7 @@ export default function SearchMissingForm() {
               className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-base rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               id="btn-trigger-search"
             >
-              <Search size={20} />
+              <UserRoundSearch  size={20} />
               Iniciar Búsqueda
             </button>
           )}
@@ -273,7 +273,7 @@ export default function SearchMissingForm() {
               className="w-full sm:w-auto py-2.5 px-5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2 shrink-0"
               id="btn-re-search"
             >
-              <Search size={18} />
+              <UserRoundSearch  size={18} />
               Buscar de nuevo
             </button>
           </div>

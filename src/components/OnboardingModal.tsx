@@ -5,7 +5,7 @@
  * Modal de bienvenida que aparece solo la primera vez que se abre la app.
  */
 import React from 'react';
-import { Search, PlusCircle, Heart, X } from 'lucide-react';
+import { UserRoundSearch , UserRoundPlus, Heart, X } from 'lucide-react';
 
 interface Props {
   onClose: () => void;
@@ -43,7 +43,7 @@ export default function OnboardingModal({ onClose }: Props) {
         <div className="grid grid-cols-1 gap-3">
           <div className="bg-rose-50/60 border border-rose-100 rounded-xl p-4 flex gap-3">
             <div className="w-10 h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0">
-              <Search size={20} />
+              <UserRoundSearch  size={20} />
             </div>
             <div>
               <h3 className="text-sm font-bold text-rose-900">Buscar familiar</h3>
@@ -55,7 +55,7 @@ export default function OnboardingModal({ onClose }: Props) {
 
           <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
-              <PlusCircle size={20} />
+              <UserRoundPlus size={20} />
             </div>
             <div>
               <h3 className="text-sm font-bold text-blue-900">Reportar persona encontrada</h3>

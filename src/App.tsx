@@ -6,8 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Heart, 
-  Search, 
-  PlusCircle, 
+  UserRoundSearch , 
+  UserRoundPlus, 
   Building, 
   Phone, 
   MapPin, 
@@ -208,7 +208,7 @@ export default function App() {
                 : 'bg-white text-rose-600 hover:bg-rose-50'
             }`}
           >
-            <Search size={20} className="shrink-0" />
+            <UserRoundSearch  size={20} className="shrink-0" />
             <span className="text-center leading-tight">Buscar Familiar</span>
           </button>
 
@@ -222,7 +222,7 @@ export default function App() {
                 : 'bg-white text-blue-600 hover:bg-blue-50'
             }`}
           >
-            <PlusCircle size={20} className="shrink-0" />
+            <UserRoundPlus size={20} className="shrink-0" />
             <span className="text-center leading-tight">Reportar Persona Encontrada</span>
           </button>
         </div>

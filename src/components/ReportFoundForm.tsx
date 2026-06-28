@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { PlusCircle, Camera, AlertCircle, MapPin, Phone, Building, Check, Heart, User, HelpCircle, Baby } from 'lucide-react';
+import { UserRoundPlus, Camera, AlertCircle, MapPin, Phone, Building, Check, Heart, User, HelpCircle, Baby } from 'lucide-react';
 import { FoundPerson } from '../types';
 import { reportarEncontrado, ResultadoRegistro } from '../api';
 import PhotoUploader, { Photo } from './form/PhotoUploader';
@@ -152,7 +152,7 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 mb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-            <PlusCircle size={22} />
+            <UserRoundPlus size={22} />
           </div>
           <div>
             <h2 className="text-lg font-bold text-slate-800 leading-tight">Reportar Persona Encontrada</h2>
@@ -390,7 +390,7 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
             className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             id="btn-submit-report"
           >
-            <PlusCircle size={20} />
+            <UserRoundPlus size={20} />
             {isSubmitting ? 'Registrando…' : 'Reportar Persona Encontrada'}
           </button>
         </form>
