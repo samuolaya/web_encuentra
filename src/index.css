@@ -2,12 +2,28 @@
 @import "tailwindcss";
 
 :root {
-  --bg-app: #e2e8f0; /* Un blanco/azul más oscuro para dar contraste a las tarjetas */
+  --bg-app: #ffffff;
 }
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --animate-slide-in-right: slideInRight 0.3s ease-out;
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes scan {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(192px); }
+  }
+  
+  @keyframes scanOverlay {
+    0%, 100% { height: 0; }
+    50% { height: 192px; }
+  }
 }
 
 body {

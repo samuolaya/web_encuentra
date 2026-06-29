@@ -5,22 +5,22 @@
  * Subida de fotos (drag&drop + grilla de miniaturas) compartida por ambos forms.
  */
 import React, { useRef } from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, User } from 'lucide-react';
 
 export type Photo = { file: File; url: string };
 
 const ACCENTS = {
   rose: {
-    zoneEmpty: 'border-rose-600 bg-rose-50/40',
-    zoneFilled: 'border-rose-300 bg-rose-50/20',
-    iconWrap: 'bg-rose-50 text-rose-500',
-    add: 'border-rose-300 text-rose-500 hover:border-rose-500 hover:bg-rose-50',
+    zoneEmpty: 'border-slate-300 bg-transparent hover:border-blue-400 hover:bg-slate-50',
+    zoneFilled: 'border-blue-300 bg-blue-50/10',
+    iconWrap: 'bg-slate-100 text-slate-500',
+    add: 'border-slate-300 text-slate-500 hover:border-slate-500 hover:bg-slate-50',
   },
   blue: {
-    zoneEmpty: 'border-blue-600 bg-blue-50/30',
-    zoneFilled: 'border-blue-300 bg-blue-50/20',
-    iconWrap: 'bg-blue-50 text-blue-500',
-    add: 'border-blue-300 text-blue-500 hover:border-blue-500 hover:bg-blue-50',
+    zoneEmpty: 'border-slate-300 bg-transparent hover:border-blue-400 hover:bg-slate-50',
+    zoneFilled: 'border-blue-300 bg-blue-50/10',
+    iconWrap: 'bg-slate-100 text-slate-500',
+    add: 'border-slate-300 text-slate-500 hover:border-slate-500 hover:bg-slate-50',
   },
 };
 
@@ -60,32 +60,42 @@ export default function PhotoUploader({ photos, max, accent, error, disabled, on
             <div className={`w-11 h-11 rounded-full ${a.iconWrap} flex items-center justify-center mx-auto mb-2`}>
               <Upload size={20} />
             </div>
-            <p className="text-sm font-semibold text-slate-700">Haz clic o arrastra las fotos aquí</p>
-            <p className="text-xs text-slate-400 mt-0.5">JPG, PNG, WebP, HEIC y más — rostro frontal claro{max > 1 ? ` (hasta ${max})` : ''}</p>
+            <p className="text-sm font-semibold text-slate-700">Toca para elegir una foto</p>
+            <p className="text-xs text-slate-400 mt-0.5">Sube una imagen clara del rostro</p>
           </button>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          <div className="flex flex-col gap-3">
             {photos.map((p, idx) => (
-              <div key={idx} className="relative aspect-square">
-                <img src={p.url} alt={`Foto ${idx + 1}`} className="w-full h-full object-contain bg-slate-100 rounded-lg border border-slate-200 shadow-sm" />
-                <button
-                  type="button"
-                  onClick={() => onRemove(idx)}
-                  className="absolute -top-1.5 -right-1.5 bg-white text-slate-500 p-1 rounded-full shadow-md border border-slate-200 hover:text-rose-600 hover:border-rose-200 transition-all z-10"
-                  aria-label="Quitar foto"
-                >
-                  <X size={13} strokeWidth={3} />
-                </button>
+              <div key={idx} className="flex items-center gap-4">
+                <div className="relative w-20 h-20 shrink-0 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 overflow-hidden" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px)' }}>
+                  <User size={32} className="text-slate-400" />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
+                    className="absolute top-1 right-1 bg-white text-slate-500 p-1 rounded-full shadow-md border border-slate-200 hover:text-rose-600 transition-all z-10"
+                    aria-label="Quitar foto"
+                  >
+                    <X size={12} strokeWidth={3} />
+                  </button>
+                </div>
+                <div className="flex flex-col text-left overflow-hidden">
+                  <span className="font-bold text-slate-800 truncate text-sm">
+                    {p.file.name.length > 20 ? p.file.name.substring(0, 20) + '...' : p.file.name}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    Lista para analizar • {p.file.type.split('/')[1]?.toUpperCase() || 'IMG'}
+                  </span>
+                </div>
               </div>
             ))}
             {photos.length < max && (
               <button
                 type="button"
-                onClick={() => inputRef.current?.click()}
-                className={`aspect-square rounded-lg border-2 border-dashed ${a.add} flex flex-col items-center justify-center gap-1 transition-all`}
+                onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+                className={`h-12 w-full rounded-xl border-2 border-dashed ${a.add} flex items-center justify-center gap-2 transition-all`}
               >
                 <Upload size={18} />
-                <span className="text-[10px] font-bold">Agregar</span>
+                <span className="text-xs font-bold">Agregar otra foto</span>
               </button>
             )}
           </div>

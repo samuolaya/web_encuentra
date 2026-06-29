@@ -16,7 +16,7 @@ const FOCUS: Record<Accent, string> = {
 };
 
 export function inputClasses(accent: Accent = 'blue', error?: boolean, hasIcon?: boolean): string {
-  const baseBorder = accent === 'rose' ? 'border-rose-500' : 'border-blue-500';
+  const baseBorder = 'border-slate-300';
   const border = error ? 'border-red-400 focus:border-red-500' : `${baseBorder} ${FOCUS[accent]}`;
   const padLeft = hasIcon ? 'pl-10' : 'pl-3.5';
   return `w-full ${padLeft} pr-3.5 py-2.5 bg-white border rounded-xl text-slate-800 text-sm placeholder-slate-400 outline-none transition-all font-medium shadow-sm ${border}`;

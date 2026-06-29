@@ -22,6 +22,7 @@ import { useSavedLocations } from '../hooks/useSavedLocations';
 
 interface ReportFoundFormProps {
   onAddPerson: (person: FoundPerson) => void;
+  onBack?: () => void;
 }
 
 const MAX_IMAGES = 1;
@@ -33,7 +34,7 @@ const HELP_STEPS: HelpStep[] = [
   { n: 4, t: 'Indexación Facial', d: 'Al enviar, el rostro se procesa y queda disponible de inmediato para las búsquedas.' },
 ];
 
-export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
+export default function ReportFoundForm({ onAddPerson, onBack }: ReportFoundFormProps) {
   const [showHelp, setShowHelp] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [photos, setPhotos] = useFormDraft<Photo[]>('report.photos', []);
@@ -151,29 +152,70 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
   const FieldError = ({ field }: { field: string }) =>
     errors[field] ? <p className="text-xs text-red-600 mt-1 flex items-center gap-1"><AlertCircle size={13} className="shrink-0" />{errors[field]}</p> : null;
 
+  const isFormValid = photos.length > 0 && refugio.trim() !== '' && telNumero.length === 7 && (!isChild || docResponsable.trim() !== '');
+
+  if (result) {
+    return (
+      <div className="w-full">
+        {onBack && (
+          <button 
+            type="button" 
+            onClick={onBack}
+            className="flex items-center gap-2 text-blue-700 font-bold hover:text-blue-800 transition-colors mb-6"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Volver
+          </button>
+        )}
+        <ReportSuccess result={result} onReset={handleResetForm} onBack={onBack} />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-blue-500 p-4 sm:p-6" id="report-found-view">
+    <div className="w-full" id="report-found-view">
       <div className="flex flex-col gap-4 pb-4 mb-4 border-b border-blue-100">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-blue-600 text-white rounded-xl shrink-0 shadow-sm">
-            <Megaphone size={22} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 leading-tight">Encontré a alguien</h2>
-            <p className="text-sm text-slate-500 leading-snug">Agrega a una persona encontrada a la base de datos.</p>
-          </div>
-        </div>
-        
-        <div className="flex justify-center w-full mt-1">
+        <div className="flex justify-between items-start mb-2">
+          {onBack && (
+            <button 
+              type="button" 
+              onClick={onBack}
+              className="flex items-center gap-2 text-blue-700 font-bold hover:text-blue-800 transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              Volver
+            </button>
+          )}
+          
           <button
             type="button"
             onClick={() => setShowHelp(true)}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black border-2 border-amber-500 bg-amber-500/15 text-amber-800 hover:bg-amber-500/25 hover:border-amber-600 transition-all active:scale-[0.98]"
-            id="btn-toggle-report-help"
+            className="p-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-all shadow-sm"
+            title="Ver instrucciones"
+            aria-label="Ver instrucciones"
           >
-            <HelpCircle size={16} className="shrink-0" />
-            ¿CÓMO FUNCIONA?
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 16v-4"></path>
+              <path d="M12 8h.01"></path>
+            </svg>
           </button>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-600 text-white rounded-xl shrink-0 shadow-sm">
+              <Megaphone size={22} />
+            </div>
+            <h2 className="text-[1.35rem] font-bold text-slate-800 leading-tight">Encontré a alguien</h2>
+          </div>
+          <p className="text-slate-500 text-sm leading-snug">
+            Agrega a una persona encontrada a la base de datos.
+          </p>
         </div>
       </div>
 
@@ -186,10 +228,7 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
         id="report-help-modal"
       />
 
-      {result ? (
-        <ReportSuccess result={result} onReset={handleResetForm} />
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
           {errors._form && (
             <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2.5 text-sm" id="report-error">
               <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
@@ -315,7 +354,7 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={!isFormValid || isSubmitting}
             className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             id="btn-submit-report"
           >
@@ -323,7 +362,6 @@ export default function ReportFoundForm({ onAddPerson }: ReportFoundFormProps) {
             {isSubmitting ? 'Registrando…' : 'Registrar que lo encontré'}
           </button>
         </form>
-      )}
 
       {showConfirmModal && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setShowConfirmModal(false)}>

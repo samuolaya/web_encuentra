@@ -14,7 +14,7 @@ import { useFormDraft } from './form/useFormDraft';
 import { usePhotoUpload } from '../hooks/usePhotoUpload';
 import AnalysisProgress from './search/AnalysisProgress';
 import CandidateModal from './search/CandidateModal';
-import MatchGrid from './search/MatchGrid';
+import SearchResultsList from './search/SearchResultsList';
 import TextField from './form/TextField';
 
 // ponytail: capacity knob — set to 1 for single-photo mode, raise to allow more
@@ -41,7 +41,11 @@ const HELP_STEPS: HelpStep[] = [
   { n: 4, t: 'Contacto Seguro', d: 'Ante una coincidencia cierta, solicita el reencuentro y preséntate en el lugar con tu identificación oficial.' },
 ];
 
-export default function SearchMissingForm() {
+interface SearchMissingFormProps {
+  onBack: () => void;
+}
+
+export default function SearchMissingForm({ onBack }: SearchMissingFormProps) {
   const [showHelp, setShowHelp] = useState(false);
   // Persistido entre cambios de pestaña (draft 'search.*')
   const [photos, setPhotos] = useFormDraft<Photo[]>('search.photos', []);
@@ -159,30 +163,74 @@ export default function SearchMissingForm() {
     setSelectedCandidate(person);
   };
 
+  const isFormValid = photos.length > 0 && (qNombre.trim() !== '' || qDocNumero.trim() !== '');
+
+  if (searchResults) {
+    return (
+      <SearchResultsList
+        results={searchResults}
+        page={page}
+        pageSize={PAGE_SIZE}
+        reportedIds={reportedIds}
+        confirmingId={confirmingId}
+        resultsError={resultsError}
+        onResetSearch={handleResetSearch}
+        onOpenCandidate={handleOpenCandidate}
+        onConfirmReport={setConfirmingId}
+        onReportPublication={(personId) => {
+          void handleReportPublication(personId);
+        }}
+        onPageChange={setPage}
+        onBack={onBack}
+      />
+    );
+  }
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-rose-500 p-4 sm:p-6" id="search-missing-view">
-      <div className="flex flex-col gap-4 pb-4 mb-4 border-b border-rose-100">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-rose-600 text-white rounded-xl shrink-0 shadow-sm">
-            <Search size={22} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-800 leading-tight">Quiero buscar a alguien</h2>
-            <p className="text-sm text-slate-500 leading-snug">Sube una foto y busca coincidencias por reconocimiento facial.</p>
-          </div>
-        </div>
-        
-        <div className="flex justify-center w-full mt-1">
-          <button
-            type="button"
-            onClick={() => setShowHelp(true)}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black border-2 border-amber-500 bg-amber-500/15 text-amber-800 hover:bg-amber-500/25 hover:border-amber-600 transition-all active:scale-[0.98]"
-            id="btn-toggle-help"
+    <div className="w-full flex flex-col items-center" id="search-missing-view">
+      <div className="w-full max-w-lg pb-4 mb-4">
+        <div className="flex justify-between items-start mb-6">
+          <button 
+            type="button" 
+            onClick={isAnalyzing ? handleResetSearch : onBack}
+            className="flex items-center gap-2 text-rose-600 font-bold hover:text-rose-700 transition-colors"
           >
-            <HelpCircle size={16} className="shrink-0" />
-            ¿CÓMO FUNCIONA?
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Volver
           </button>
+          
+          {!isAnalyzing && (
+            <button
+              type="button"
+              onClick={() => setShowHelp(true)}
+              className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-full transition-all shadow-sm"
+              title="Ver instrucciones"
+              aria-label="Ver instrucciones"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+            </button>
+          )}
         </div>
+
+        {!isAnalyzing && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-rose-600 text-white rounded-xl shrink-0 shadow-sm">
+                <Search size={22} />
+              </div>
+              <h2 className="text-[1.35rem] font-bold text-slate-800 leading-tight">Busco a alguien</h2>
+            </div>
+            <p className="text-slate-500 text-sm leading-snug">
+              Sube una foto y busca coincidencias con reconocimiento facial en segundos.
+            </p>
+          </div>
+        )}
       </div>
 
       <HelpModal
@@ -194,16 +242,18 @@ export default function SearchMissingForm() {
         id="help-procedure-modal"
       />
 
-      {!searchResults ? (
-        <form onSubmit={startAnalysis} className="space-y-5">
+      <div className="w-full max-w-lg">
+        {isAnalyzing ? (
+          <AnalysisProgress step={analysisStep} progress={analysisProgress} />
+        ) : (
+          <form onSubmit={startAnalysis} className="space-y-6">
+            
           {/* Step 1: Image Selection */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between gap-2">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <Camera size={14} className="text-rose-600" />
-                Fotos de la persona
+              <label className="text-sm font-bold text-slate-800 tracking-tight">
+                Foto de la persona
               </label>
-              {photos.length > 0 && <span className="text-[11px] font-semibold text-slate-400">{photos.length}/{MAX_IMAGES}</span>}
             </div>
 
             <PhotoUploader photos={photos} max={MAX_IMAGES} accent="rose" error={!!error} disabled={isAnalyzing} onAdd={addFiles} onRemove={removePhoto} />
@@ -213,22 +263,13 @@ export default function SearchMissingForm() {
               </p>
             )}
 
-            {/* Identidad de la persona buscada: basta UNO de los dos */}
-            <div className="space-y-2 pt-1">
-              <div>
-                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <User size={14} className="text-rose-600" />
-                  Datos de la persona que buscas <span className="text-rose-500">*</span>
-                </p>
-                <p className="text-[11px] text-slate-400 mt-0.5 ml-5">Completa su nombre o su cedula
-                  <strong> (no hacen falta ambos).</strong></p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
+            {/* Identidad de la persona buscada */}
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
                   <TextField
-                    label="Nombre"
+                    label="Nombre de la persona"
                     id="search-nombre"
-                    placeholder="Nombre de quien buscas"
+                    placeholder="Juan Pérez"
                     maxLength={80}
                     value={qNombre}
                     onChange={(value) => {
@@ -238,19 +279,18 @@ export default function SearchMissingForm() {
                     accent="rose"
                     invalid={!!idError}
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="search-doc" className="text-[11px] font-semibold text-slate-500 normal-case block">Cédula</label>
-                  <DocumentInput
-                    tipo={qDocTipo}
-                    numero={qDocNumero}
-                    onTipo={setQDocTipo}
-                    onNumero={(v) => { setQDocNumero(v); setIdError(null); }}
-                    accent="rose"
-                    error={!!idError}
-                    numeroId="search-doc"
-                  />
-                </div>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="search-doc" className="text-sm font-bold text-slate-800 tracking-tight block">Cédula</label>
+                <DocumentInput
+                  tipo={qDocTipo}
+                  numero={qDocNumero}
+                  onTipo={setQDocTipo}
+                  onNumero={(v) => { setQDocNumero(v); setIdError(null); }}
+                  accent="rose"
+                  error={!!idError}
+                  numeroId="search-doc"
+                />
               </div>
               {idError && (
                 <p className="text-xs text-red-600 flex items-center gap-1"><AlertCircle size={13} className="shrink-0" />{idError}</p>
@@ -258,37 +298,18 @@ export default function SearchMissingForm() {
             </div>
           </div>
 
-          {/* Action Trigger / Scanning Simulation overlay */}
-          {isAnalyzing ? (
-            <AnalysisProgress step={analysisStep} progress={analysisProgress} />
-          ) : (
-            <button
-              type="submit"
-              className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-base rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-              id="btn-trigger-search"
-            >
-              <Search size={20} />
-              Iniciar Búsqueda
-            </button>
-          )}
-        </form>
-      ) : (
-        <MatchGrid
-          results={searchResults}
-          page={page}
-          pageSize={PAGE_SIZE}
-          reportedIds={reportedIds}
-          confirmingId={confirmingId}
-          resultsError={resultsError}
-          onResetSearch={handleResetSearch}
-          onOpenCandidate={handleOpenCandidate}
-          onConfirmReport={setConfirmingId}
-          onReportPublication={(personId) => {
-            void handleReportPublication(personId);
-          }}
-          onPageChange={setPage}
-        />
-      )}
+              <button
+                type="submit"
+                disabled={!isFormValid || isAnalyzing}
+                className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-4"
+                id="btn-trigger-search"
+              >
+                <Search size={20} />
+                Iniciar Búsqueda
+              </button>
+            </form>
+        )}
+      </div>
 
       <CandidateModal candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} waLink={waLink} />
     </div>

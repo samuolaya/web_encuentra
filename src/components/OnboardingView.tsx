@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Megaphone, Heart } from 'lucide-react';
+import { Search, Megaphone } from 'lucide-react';
 
 interface Props {
   onSelect: (option: 'buscar' | 'reportar') => void;
@@ -7,50 +7,65 @@ interface Props {
 
 export default function OnboardingView({ onSelect }: Props) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 w-full max-w-lg mx-auto p-6 sm:p-8 animate-[fadeIn_0.2s_ease-out]">
-      <div className="text-center mb-8">
-        <div className="relative w-16 h-16 rounded-xl shadow-sm overflow-hidden flex items-center justify-center mx-auto mb-4">
-          <div className="absolute inset-0 flex flex-col">
-            <div className="flex-1 bg-amber-400"></div>
-            <div className="flex-1 bg-blue-600"></div>
-            <div className="flex-1 bg-rose-600"></div>
+    <div className="w-full flex flex-col bg-slate-100 animate-[fadeIn_0.2s_ease-out]">
+      {/* Header Section with Image Background */}
+      <div className="w-full px-6 sm:px-8 pt-16 pb-32 sm:pb-40 relative overflow-hidden flex-shrink-0">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+          style={{ backgroundImage: 'url("/fondo.png")' }}
+        ></div>
+        
+        {/* Gradient Overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/70 to-slate-900/90"></div>
+        
+        <div className="max-w-7xl mx-auto w-full relative z-10 flex flex-col items-center text-center sm:text-left sm:items-start">
+          <div className="w-full max-w-2xl sm:pl-8">
+            <h2 className="text-[2.5rem] sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] mb-3 tracking-tight">Reuniendo<br/>Familias</h2>
+            <p className="text-lg sm:text-xl font-medium text-white/90">Una búsqueda a la vez</p>
           </div>
-          <Heart size={28} className="relative text-white fill-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
         </div>
-        <h2 className="text-xl font-black text-slate-800 tracking-tight">Bienvenido a VzlaEncuentra</h2>
-        <p className="text-slate-500 mt-2">Selecciona cómo deseas ayudar para comenzar.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        <button 
-          onClick={() => onSelect('buscar')}
-          className="bg-rose-100/50 border border-rose-200 rounded-xl p-5 flex gap-4 text-left hover:bg-rose-100 transition-colors shadow-sm hover:shadow-md group"
-        >
-          <div className="w-12 h-12 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Search size={24} />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-rose-900">Quiero buscar a alguien</h3>
-            <p className="text-sm text-slate-600 leading-snug mt-1">
-              Sube la foto de tu ser querido. Analizamos su rostro y lo comparamos con las personas ya reportadas.
+      {/* Cards Section */}
+      <div className="w-full px-4 sm:px-8 -mt-20 sm:-mt-24 relative z-20 pb-8 flex-grow">
+        <div className="max-w-lg mx-auto flex flex-col gap-5 sm:gap-6">
+          {/* Card 1 - Buscar */}
+          <div className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col border border-slate-100">
+            <div className="flex items-center gap-3 mb-2">
+              <Search size={24} className="text-slate-800" />
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Busco a alguien</h3>
+            </div>
+            <p className="text-slate-500 text-sm sm:text-base mb-6 sm:mb-8">
+              Reconocimiento facial en segundos. Sube una foto y buscamos coincidencias.
             </p>
+            <button 
+              onClick={() => onSelect('buscar')}
+              className="w-full bg-rose-600 hover:bg-rose-700 text-white py-4 px-4 rounded-[16px] font-bold text-base sm:text-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
+            >
+              <Search size={20} />
+              Iniciar búsqueda
+            </button>
           </div>
-        </button>
 
-        <button 
-          onClick={() => onSelect('reportar')}
-          className="bg-blue-100/50 border border-blue-200 rounded-xl p-5 flex gap-4 text-left hover:bg-blue-100 transition-colors shadow-sm hover:shadow-md group"
-        >
-          <div className="w-12 h-12 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Megaphone size={24} />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-blue-900">Encontré a alguien</h3>
-            <p className="text-sm text-slate-600 leading-snug mt-1">
-              ¿Ayudaste a alguien? Registra su foto y sus datos para que su familia pueda dar con ella. Reporta solo casos reales.
+          {/* Card 2 - Reportar */}
+          <div className="bg-white rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col border border-slate-100">
+            <div className="flex items-center gap-3 mb-2">
+              <Megaphone size={24} className="text-slate-800" />
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Encontré a alguien</h3>
+            </div>
+            <p className="text-slate-500 text-sm sm:text-base mb-6 sm:mb-8">
+              Comparte dónde y cuándo la viste para ayudar a su familia a encontrarla.
             </p>
+            <button 
+              onClick={() => onSelect('reportar')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-4 rounded-[16px] font-bold text-base sm:text-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
+            >
+              <Megaphone size={20} />
+              Reportar persona
+            </button>
           </div>
-        </button>
+        </div>
       </div>
     </div>
   );
